@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Image Caption Generator</title>
+<meta name="description" content="Generate captions, alt text and hashtags for any image, right in your browser.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <h1>Captionly</h1>
+  <button id="themeBtn" class="ghost" aria-label="Toggle dark mode">Dark mode</button>
+</header>
+
+<main>
+  <section class="panel">
+    <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose an image">
+      <img id="preview" alt="Preview of the selected image" hidden>
+      <p id="dropText">Drop an image here, paste one, or click to browse</p>
+      <input id="file" type="file" accept="image/*" hidden>
+    </div>
+    <div class="row">
+      <input id="urlInput" type="url" placeholder="Or paste an image URL">
+      <button id="urlBtn" class="ghost">Load</button>
+    </div>
+    <button id="genBtn" class="primary" disabled>Generate caption</button>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <div id="bar" class="bar" hidden><span></span></div>
+  </section>
+
+  <section class="panel" id="result" hidden>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <textarea id="caption" rows="4" aria-label="Caption (editable)"></textarea>
+    <div class="chips" id="tags"></div>
+    <div class="row wrap">
+      <button id="copyBtn" class="ghost">Copy</button>
+      <button id="speakBtn" class="ghost">Read aloud</button>
+      <button id="dlBtn" class="ghost">Download .txt</button>
+      <button id="regenBtn" class="ghost">Regenerate</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="row between">
+      <h2>History</h2>
+      <button id="clearBtn" class="ghost">Clear</button>
+    </div>
+    <ul id="history" class="history"><li class="empty">Captions you generate will appear here.</li></ul>
+  </section>
+</main>
+
+<footer>Runs fully in your browser with Transformers.js. Images are never uploaded. The model (~300 MB) downloads on first use, then is cached.</footer>
+<script type="module" src="script.js"></script>
+</body>
+</html>
