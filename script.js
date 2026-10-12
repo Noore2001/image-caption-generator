@@ -5,7 +5,7 @@ const $ = id => document.getElementById(id);
 const el = { drop:$('drop'), file:$('file'), preview:$('preview'), dropText:$('dropText'), url:$('urlInput'),
   urlBtn:$('urlBtn'), gen:$('genBtn'), status:$('status'), bar:$('bar'), result:$('result'), tabs:$('tabs'),
   caption:$('caption'), tags:$('tags'), copy:$('copyBtn'), speak:$('speakBtn'), dl:$('dlBtn'),
-  regen:$('regenBtn'), hist:$('history'), clear:$('clearBtn'), theme:$('themeBtn') };
+  regen:$('regenBtn'), hist:$('history'), clear:$('clearBtn'), theme:$('themeBtn'), remove:$('removeBtn') };
 
 const STYLES = ['Descriptive','Short','Social','Alt text','Formal'];
 const STOP = new Set('a an the of in on at with and is are to for his her their its it this that two three there next near top front some while from by as'.split(' '));
@@ -48,7 +48,15 @@ function render() {
 
 function setImage(src) {
   imgSrc = src; el.preview.src = src; el.preview.hidden = false; el.dropText.hidden = true;
-  el.gen.disabled = false; el.result.hidden = true; say('Image ready. Click Generate caption.');
+  el.gen.disabled = false; el.remove.disabled = false; el.result.hidden = true; say('Image ready. Click Generate caption.');
+}
+function removeImage() {
+  imgSrc = ''; base = ''; styleIdx = 0;
+  el.preview.removeAttribute('src'); el.preview.hidden = true; el.dropText.hidden = false;
+  el.file.value = ''; el.url.value = '';
+  el.gen.disabled = true; el.remove.disabled = true; el.result.hidden = true;
+  el.bar.hidden = true; say('Image removed. Add a new one to continue.');
+  el.drop.focus();
 }
 function loadFile(f) {
   if (!f || !f.type.startsWith('image/')) return say('Please choose an image file (JPG, PNG, WebP, GIF).', true);
@@ -71,12 +79,13 @@ async function getModel() {
 }
 
 async function generate() {
-  el.gen.disabled = el.regen.disabled = true;
+  const src = imgSrc;
+  el.gen.disabled = el.regen.disabled = el.remove.disabled = true;
   try {
     say('Loading model…');
     const model = await getModel();
     say('Generating caption…');
-    const out = await model(imgSrc, { max_new_tokens: 40 });
+    const out = await model(src, { max_new_tokens: 40 });
     base = out[0].generated_text;
     render(); say('Done.');
     history.unshift({ src: await thumb(imgSrc), text: base, date: Date.now() });
@@ -84,7 +93,7 @@ async function generate() {
   } catch (e) {
     console.error(e);
     say('Could not generate a caption. If you loaded a URL, the site may block cross-origin images; download it and upload instead.', true);
-  } finally { el.gen.disabled = el.regen.disabled = false; el.bar.hidden = true; }
+  } finally { el.gen.disabled = el.regen.disabled = false; el.remove.disabled = false; el.bar.hidden = true; }
 }
 
 function thumb(src) {
@@ -119,6 +128,7 @@ el.drop.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
 addEventListener('paste', e => { const f = [...e.clipboardData.files].find(f => f.type.startsWith('image/')); if (f) loadFile(f); });
 el.urlBtn.onclick = () => el.url.value.trim() && setImage(el.url.value.trim());
 el.gen.onclick = el.regen.onclick = generate;
+el.remove.onclick = removeImage;
 el.copy.onclick = () => navigator.clipboard.writeText(el.caption.value).then(() => say('Caption copied.'));
 el.speak.onclick = () => { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance(el.caption.value)); };
 el.dl.onclick = () => { const a = document.createElement('a');
